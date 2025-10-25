@@ -15,7 +15,7 @@ if user_input:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "You are a helpful and knowledgeable AI study assistant."},
+                    {"role": "system", "content": "You are a helpful and knowledgeable AI study assistant who gives clear, educational answers to students."},
                     {"role": "user", "content": user_input}
                 ]
             )
