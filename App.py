@@ -1,10 +1,26 @@
 import streamlit as st
+from openai import OpenAI
 
-st.title("My AI App 🚀")
+# Page title
+st.title("💬 AI Study Assistant")
 
-question = st.text_input("Ask me anything:")
+# Create OpenAI client (uses your Streamlit secret key)
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+# User input box
+question = st.text_input("Ask me anything related to your studies:")
 
 if question:
-    st.write("Good question! I'm still learning to answer — update coming soon 🔧")
-else:
-    st.write("Type a question above to start.")
+    with st.spinner("Thinking..."):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful, smart AI study assistant for students. Explain answers clearly and simply."},
+                    {"role": "user", "content": question}
+                ]
+            )
+            # Display the AI's reply
+            st.write(response.choices[0].message.content)
+        except Exception as e:
+            st.error(f"Error: {e}")
