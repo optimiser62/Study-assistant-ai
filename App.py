@@ -1,26 +1,33 @@
 import streamlit as st
 from openai import OpenAI
 
-# Page title
 st.title("💬 AI Study Assistant")
 
-# Create OpenAI client (uses your Streamlit secret key)
+# Create OpenAI client
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# User input box
-question = st.text_input("Ask me anything related to your studies:")
+# Store chat messages
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-if question:
+# Display chat history
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).write(msg["content"])
+
+# Chat input
+if prompt := st.chat_input("Ask your study question..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+
+    # Get AI answer
     with st.spinner("Thinking..."):
-        try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful, smart AI study assistant for students. Explain answers clearly and simply."},
-                    {"role": "user", "content": question}
-                ]
-            )
-            # Display the AI's reply
-            st.write(response.choices[0].message.content)
-        except Exception as e:
-            st.error(f"Error: {e}")
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful and smart AI study assistant."},
+                *st.session_state.messages
+            ]
+        )
+        msg = response.choices[0].message.content
+        st.session_state.messages.append({"role": "assistant", "content": msg})
+        st.chat_message("assistant").write(msg)
