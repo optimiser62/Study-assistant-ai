@@ -1,33 +1,22 @@
 import streamlit as st
 from openai import OpenAI
 
-st.title("💬 AI Study Assistant")
-
-# Create OpenAI client
+# Get API key from Streamlit secrets
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Store chat messages
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+st.title("💬 AI Study Assistant")
 
-# Display chat history
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+prompt = st.text_input("Ask me anything about your studies:")
 
-# Chat input
-if prompt := st.chat_input("Ask your study question..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-
-    # Get AI answer
-    with st.spinner("Thinking..."):
+if st.button("Get Answer"):
+    if prompt:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful and smart AI study assistant."},
-                *st.session_state.messages
+                {"role": "system", "content": "You are a helpful AI study assistant."},
+                {"role": "user", "content": prompt}
             ]
         )
-        msg = response.choices[0].message.content
-        st.session_state.messages.append({"role": "assistant", "content": msg})
-        st.chat_message("assistant").write(msg)
+        st.write(response.choices[0].message.content)
+    else:
+        st.warning("Please enter a question first!")
